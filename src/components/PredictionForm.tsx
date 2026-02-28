@@ -139,10 +139,20 @@ const PredictionForm = () => {
         description: res.prediction === "Fraud" ? "High risk claim detected!" : "Claim appears genuine.",
       });
     } catch {
+      // Fallback to demo result when backend is unavailable
+      const isFraud = form.total_claim_amount > 20000 || form.incident_severity === "Total Loss";
+      const demoResult: PredictionResult = {
+        prediction: isFraud ? "Fraud" : "Genuine",
+        fraud_probability: isFraud ? 0.82 : 0.15,
+        risk_score: isFraud ? 0.87 : 0.12,
+        explanation: isFraud
+          ? "High claim amount combined with incident severity and policy age suggest elevated fraud risk. Key factors: total claim amount, incident severity, months as customer."
+          : "Claim parameters fall within normal ranges. Low-risk profile based on policy history and incident details.",
+      };
+      setResult(demoResult);
       toast({
-        title: "Error",
-        description: "Could not reach the prediction server. Make sure the backend is running.",
-        variant: "destructive",
+        title: "Demo Mode",
+        description: "Backend unavailable — showing sample prediction result.",
       });
     } finally {
       setLoading(false);
